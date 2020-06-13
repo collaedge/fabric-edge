@@ -9,7 +9,7 @@ volumes:
   peer0.org3.edge.com:
 
 networks:
-  test:
+  net:
 
 services:
 
