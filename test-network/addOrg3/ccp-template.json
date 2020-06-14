@@ -15,7 +15,9 @@
         "Org${ORG}": {
             "mspid": "Org${ORG}MSP",
             "peers": [
-                "peer0.org${ORG}.edge.com"
+                "peer0.org${ORG}.edge.com",
+                "peer1.org${ORG}.edge.com",
+                "peer2.org${ORG}.edge.com"
             ],
             "certificateAuthorities": [
                 "ca.org${ORG}.edge.com"
@@ -31,6 +33,26 @@
             "grpcOptions": {
                 "ssl-target-name-override": "peer0.org${ORG}.edge.com",
                 "hostnameOverride": "peer0.org${ORG}.edge.com"
+            }
+        },
+        "peer1.org${ORG}.edge.com": {
+            "url": "grpcs://localhost:${P1PORT}",
+            "tlsCACerts": {
+                "pem": "${PEERPEM}"
+            },
+            "grpcOptions": {
+                "ssl-target-name-override": "peer1.org${ORG}.edge.com",
+                "hostnameOverride": "peer1.org${ORG}.edge.com"
+            }
+        },
+        "peer2.org${ORG}.edge.com": {
+            "url": "grpcs://localhost:${P2PORT}",
+            "tlsCACerts": {
+                "pem": "${PEERPEM}"
+            },
+            "grpcOptions": {
+                "ssl-target-name-override": "peer2.org${ORG}.edge.com",
+                "hostnameOverride": "peer2.org${ORG}.edge.com"
             }
         }
     },

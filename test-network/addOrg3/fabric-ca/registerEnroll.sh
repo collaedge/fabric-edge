@@ -38,6 +38,20 @@ function createOrg3 {
   set +x
 
   echo
+	echo "Register peer1"
+  echo
+  set -x
+	fabric-ca-client register --caname ca-org3 --id.name peer1 --id.secret peer1pw --id.type peer --tls.certfiles ${PWD}/fabric-ca/org3/tls-cert.pem
+  set +x
+
+  echo
+	echo "Register peer2"
+  echo
+  set -x
+	fabric-ca-client register --caname ca-org3 --id.name peer2 --id.secret peer2pw --id.type peer --tls.certfiles ${PWD}/fabric-ca/org3/tls-cert.pem
+  set +x
+
+  echo
   echo "Register user"
   echo
   set -x
@@ -64,10 +78,42 @@ function createOrg3 {
   cp ${PWD}/../organizations/peerOrganizations/org3.edge.com/msp/config.yaml ${PWD}/../organizations/peerOrganizations/org3.edge.com/peers/peer0.org3.edge.com/msp/config.yaml
 
   echo
+  echo "## Generate the peer1 msp"
+  echo
+  set -x
+	fabric-ca-client enroll -u https://peer1:peer1pw@localhost:11054 --caname ca-org3 -M ${PWD}/../organizations/peerOrganizations/org3.edge.com/peers/peer1.org3.edge.com/msp --csr.hosts peer1.org3.edge.com --tls.certfiles ${PWD}/fabric-ca/org3/tls-cert.pem
+  set +x
+
+  cp ${PWD}/../organizations/peerOrganizations/org3.edge.com/msp/config.yaml ${PWD}/../organizations/peerOrganizations/org3.edge.com/peers/peer1.org3.edge.com/msp/config.yaml
+
+  echo
+  echo "## Generate the peer2 msp"
+  echo
+  set -x
+	fabric-ca-client enroll -u https://peer2:peer2pw@localhost:11054 --caname ca-org3 -M ${PWD}/../organizations/peerOrganizations/org3.edge.com/peers/peer2.org3.edge.com/msp --csr.hosts peer2.org3.edge.com --tls.certfiles ${PWD}/fabric-ca/org3/tls-cert.pem
+  set +x
+
+  cp ${PWD}/../organizations/peerOrganizations/org3.edge.com/msp/config.yaml ${PWD}/../organizations/peerOrganizations/org3.edge.com/peers/peer2.org3.edge.com/msp/config.yaml
+
+  echo
   echo "## Generate the peer0-tls certificates"
   echo
   set -x
   fabric-ca-client enroll -u https://peer0:peer0pw@localhost:11054 --caname ca-org3 -M ${PWD}/../organizations/peerOrganizations/org3.edge.com/peers/peer0.org3.edge.com/tls --enrollment.profile tls --csr.hosts peer0.org3.edge.com --csr.hosts localhost --tls.certfiles ${PWD}/fabric-ca/org3/tls-cert.pem
+  set +x
+
+  echo
+  echo "## Generate the peer1-tls certificates"
+  echo
+  set -x
+  fabric-ca-client enroll -u https://peer1:peer1pw@localhost:11054 --caname ca-org3 -M ${PWD}/../organizations/peerOrganizations/org3.edge.com/peers/peer1.org3.edge.com/tls --enrollment.profile tls --csr.hosts peer1.org3.edge.com --csr.hosts localhost --tls.certfiles ${PWD}/fabric-ca/org3/tls-cert.pem
+  set +x
+
+  echo
+  echo "## Generate the peer2-tls certificates"
+  echo
+  set -x
+  fabric-ca-client enroll -u https://peer2:peer2pw@localhost:11054 --caname ca-org3 -M ${PWD}/../organizations/peerOrganizations/org3.edge.com/peers/peer2.org3.edge.com/tls --enrollment.profile tls --csr.hosts peer2.org3.edge.com --csr.hosts localhost --tls.certfiles ${PWD}/fabric-ca/org3/tls-cert.pem
   set +x
 
 
@@ -75,6 +121,15 @@ function createOrg3 {
   cp ${PWD}/../organizations/peerOrganizations/org3.edge.com/peers/peer0.org3.edge.com/tls/signcerts/* ${PWD}/../organizations/peerOrganizations/org3.edge.com/peers/peer0.org3.edge.com/tls/server.crt
   cp ${PWD}/../organizations/peerOrganizations/org3.edge.com/peers/peer0.org3.edge.com/tls/keystore/* ${PWD}/../organizations/peerOrganizations/org3.edge.com/peers/peer0.org3.edge.com/tls/server.key
 
+  cp ${PWD}/../organizations/peerOrganizations/org3.edge.com/peers/peer1.org3.edge.com/tls/tlscacerts/* ${PWD}/../organizations/peerOrganizations/org3.edge.com/peers/peer1.org3.edge.com/tls/ca.crt
+  cp ${PWD}/../organizations/peerOrganizations/org3.edge.com/peers/peer1.org3.edge.com/tls/signcerts/* ${PWD}/../organizations/peerOrganizations/org3.edge.com/peers/peer1.org3.edge.com/tls/server.crt
+  cp ${PWD}/../organizations/peerOrganizations/org3.edge.com/peers/peer1.org3.edge.com/tls/keystore/* ${PWD}/../organizations/peerOrganizations/org3.edge.com/peers/peer1.org3.edge.com/tls/server.key
+
+  cp ${PWD}/../organizations/peerOrganizations/org3.edge.com/peers/peer2.org3.edge.com/tls/tlscacerts/* ${PWD}/../organizations/peerOrganizations/org3.edge.com/peers/peer2.org3.edge.com/tls/ca.crt
+  cp ${PWD}/../organizations/peerOrganizations/org3.edge.com/peers/peer2.org3.edge.com/tls/signcerts/* ${PWD}/../organizations/peerOrganizations/org3.edge.com/peers/peer2.org3.edge.com/tls/server.crt
+  cp ${PWD}/../organizations/peerOrganizations/org3.edge.com/peers/peer2.org3.edge.com/tls/keystore/* ${PWD}/../organizations/peerOrganizations/org3.edge.com/peers/peer2.org3.edge.com/tls/server.key
+
+  # copy org3 certificates to org3.edge.com
   mkdir ${PWD}/../organizations/peerOrganizations/org3.edge.com/msp/tlscacerts
   cp ${PWD}/../organizations/peerOrganizations/org3.edge.com/peers/peer0.org3.edge.com/tls/tlscacerts/* ${PWD}/../organizations/peerOrganizations/org3.edge.com/msp/tlscacerts/ca.crt
 
