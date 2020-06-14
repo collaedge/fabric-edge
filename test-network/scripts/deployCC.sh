@@ -57,7 +57,7 @@ else
 fi
 
 # import utils
-. scripts/envVar.sh
+. scripts/envVar_chaincode.sh
 
 
 packageChaincode() {
@@ -76,14 +76,15 @@ packageChaincode() {
 # installChaincode PEER ORG
 installChaincode() {
   ORG=$1
-  setGlobals $ORG
+  PEER=$2
+  setGlobals $ORG $PEER
   set -x
   peer lifecycle chaincode install fabcar.tar.gz >&log.txt
   res=$?
   set +x
   cat log.txt
-  verifyResult $res "Chaincode installation on peer0.org${ORG} has failed"
-  echo "===================== Chaincode is installed on peer0.org${ORG} ===================== "
+  verifyResult $res "Chaincode installation on peer${PEER}.org${ORG} has failed"
+  echo "===================== Chaincode is installed on peer${PEER}.org${ORG} ===================== "
   echo
 }
 
@@ -252,11 +253,20 @@ chaincodeQuery() {
 ## at first we package the chaincode
 packageChaincode 1
 
-## Install chaincode on peer0.org1 and peer0.org2
+## Install chaincode on peers of org1 and peers of org2
 echo "Installing chaincode on peer0.org1..."
-installChaincode 1
+installChaincode 1 0
+echo "Installing chaincode on peer1.org1..."
+installChaincode 1 1
+echo "Installing chaincode on peer2.org1..."
+installChaincode 1 2
+
 echo "Install chaincode on peer0.org2..."
-installChaincode 2
+installChaincode 2 0
+echo "Install chaincode on peer1.org2..."
+installChaincode 2 1
+echo "Install chaincode on peer2.org2..."
+installChaincode 2 2
 
 ## query whether the chaincode is installed
 queryInstalled 1
