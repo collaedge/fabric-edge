@@ -91,28 +91,30 @@ installChaincode() {
 # queryInstalled PEER ORG
 queryInstalled() {
   ORG=$1
-  setGlobals $ORG
+  PEER=$2
+  setGlobals $ORG $PEER
   set -x
   peer lifecycle chaincode queryinstalled >&log.txt
   res=$?
   set +x
   cat log.txt
 	PACKAGE_ID=$(sed -n "/fabcar_${VERSION}/{s/^Package ID: //; s/, Label:.*$//; p;}" log.txt)
-  verifyResult $res "Query installed on peer0.org${ORG} has failed"
-  echo "===================== Query installed successful on peer0.org${ORG} on channel ===================== "
+  verifyResult $res "Query installed on peer${PEER}.org${ORG} has failed"
+  echo "===================== Query installed successful on peer${PEER}.org${ORG} on channel ===================== "
   echo
 }
 
 # approveForMyOrg VERSION PEER ORG
 approveForMyOrg() {
   ORG=$1
-  setGlobals $ORG
+  PEER=$2
+  setGlobals $ORG $PEER
   set -x
   peer lifecycle chaincode approveformyorg -o localhost:7050 --ordererTLSHostnameOverride orderer.edge.com --tls --cafile $ORDERER_CA --channelID $CHANNEL_NAME --name fabcar --version ${VERSION} --init-required --package-id ${PACKAGE_ID} --sequence ${VERSION} >&log.txt
   set +x
   cat log.txt
-  verifyResult $res "Chaincode definition approved on peer0.org${ORG} on channel '$CHANNEL_NAME' failed"
-  echo "===================== Chaincode definition approved on peer0.org${ORG} on channel '$CHANNEL_NAME' ===================== "
+  verifyResult $res "Chaincode definition approved on peer${PEER}.org${ORG} on channel '$CHANNEL_NAME' failed"
+  echo "===================== Chaincode definition approved on peer${PEER}.org${ORG} on channel '$CHANNEL_NAME' ===================== "
   echo
 }
 
@@ -253,42 +255,79 @@ chaincodeQuery() {
 ## at first we package the chaincode
 packageChaincode 1
 
+# first param: org number
+# second param: peer number
+
 ## Install chaincode on peers of org1 and peers of org2
 echo "Installing chaincode on peer0.org1..."
 installChaincode 1 0
+## query whether the chaincode is installed on peer0 of org1
+queryInstalled 1 0
+## approve the definition for peer0 of org1
+approveForMyOrg 1 0
+
 echo "Installing chaincode on peer1.org1..."
 installChaincode 1 1
+## query whether the chaincode is installed on peer1 of org1
+queryInstalled 1 1
+## approve the definition for peer1 of org1
+approveForMyOrg 1 1
+
 echo "Installing chaincode on peer2.org1..."
 installChaincode 1 2
+## query whether the chaincode is installed on peer2 of org1
+queryInstalled 1 2
+## approve the definition for peer2 of org1
+approveForMyOrg 1 2
+
+checkCommitReadiness 1
+checkCommitReadiness 2
 
 echo "Install chaincode on peer0.org2..."
 installChaincode 2 0
+## query whether the chaincode is installed on peer0 of org2
+queryInstalled 2 0
+## approve the definition for peer0 of org2
+approveForMyOrg 2 0
+
 echo "Install chaincode on peer1.org2..."
 installChaincode 2 1
+## query whether the chaincode is installed on peer1 of org2
+queryInstalled 2 1
+## approve the definition for peer1 of org2
+approveForMyOrg 2 1
+
 echo "Install chaincode on peer2.org2..."
 installChaincode 2 2
+## query whether the chaincode is installed on peer2 of org2
+queryInstalled 2 1
+## approve the definition for peer2 of org2
+approveForMyOrg 2 1
 
-## query whether the chaincode is installed
-queryInstalled 1
-
-## approve the definition for org1
-approveForMyOrg 1
+checkCommitReadiness 1
+checkCommitReadiness 2
 
 ## check whether the chaincode definition is ready to be committed
 ## expect org1 to have approved and org2 not to
-checkCommitReadiness 1 "\"Org1MSP\": true" "\"Org2MSP\": false"
-checkCommitReadiness 2 "\"Org1MSP\": true" "\"Org2MSP\": false"
+# checkCommitReadiness 1 "\"Org1MSP\": true" "\"Org2MSP\": false"
+# checkCommitReadiness 2 "\"Org1MSP\": true" "\"Org2MSP\": false"
 
-## now approve also for org2
-approveForMyOrg 2
 
 ## check whether the chaincode definition is ready to be committed
 ## expect them both to have approved
-checkCommitReadiness 1 "\"Org1MSP\": true" "\"Org2MSP\": true"
-checkCommitReadiness 2 "\"Org1MSP\": true" "\"Org2MSP\": true"
+# checkCommitReadiness 1 "\"Org1MSP\": true" "\"Org2MSP\": true"
+# checkCommitReadiness 2 "\"Org1MSP\": true" "\"Org2MSP\": true"
 
-## now that we know for sure both orgs have approved, commit the definition
+## now that we know for sure orgs have approved, commit the definition
+# first param: org number
+# second param: peer number
+commitChaincodeDefinition 1 0
+commitChaincodeDefinition 1 1
 commitChaincodeDefinition 1 2
+
+commitChaincodeDefinition 2 0
+commitChaincodeDefinition 2 1
+commitChaincodeDefinition 2 2
 
 ## query on both orgs to see that the definition committed successfully
 queryCommitted 1

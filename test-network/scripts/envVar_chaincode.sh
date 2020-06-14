@@ -84,22 +84,24 @@ setGlobals() {
 # parsePeerConnectionParameters $@
 # Helper function that sets the peer connection parameters for a chaincode
 # operation
+# $1: org number
+# $2: peer number
 parsePeerConnectionParameters() {
 
   PEER_CONN_PARMS=""
   PEERS=""
-  while [ "$#" -gt 0 ]; do
-    setGlobals $1
-    PEER="peer0.org$1"
-    ## Set peer adresses
-    PEERS="$PEERS $PEER"
-    PEER_CONN_PARMS="$PEER_CONN_PARMS --peerAddresses $CORE_PEER_ADDRESS"
-    ## Set path to TLS certificate
-    TLSINFO=$(eval echo "--tlsRootCertFiles \$PEER0_ORG$1_CA")
-    PEER_CONN_PARMS="$PEER_CONN_PARMS $TLSINFO"
+  #while [ "$#" -gt 0 ]; do
+  setGlobals $1 $2
+  PEER="peer$2.org$1"
+  ## Set peer adresses
+  PEERS="$PEERS $PEER"
+  PEER_CONN_PARMS="$PEER_CONN_PARMS --peerAddresses $CORE_PEER_ADDRESS"
+  ## Set path to TLS certificate
+  TLSINFO=$(eval echo "--tlsRootCertFiles \$PEER$2_ORG$1_CA")
+  PEER_CONN_PARMS="$PEER_CONN_PARMS $TLSINFO"
     # shift by one to get to the next organization
-    shift
-  done
+    #shift
+  #done
   # remove leading space for output
   PEERS="$(echo -e "$PEERS" | sed -e 's/^[[:space:]]*//')"
 }
